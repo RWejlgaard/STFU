@@ -60,31 +60,30 @@ def format_list(files, size=False, date=False):
                 print(f" ├ {name}{extra_info}")
 
 
-def download(client, file):
-    for k, v in list_files(client).items():
-        for f in v:
-            if f['name'] == file:
-                ext = f['name'].split('.')[-1]
-                b = client.get_bucket(load_config()['bucket'])
-                blob = b.get_blob(f"{ext}/{f['name']}")
-                blob.download_to_filename(f"./{f['name'][7::]}")
+def download(client, files):
+    b = client.get_bucket(load_config()['bucket'])
+    for target in files:
+        for k, v in list_files(client).items():
+            for f in v:
+                if f['name'] == target:
+                    ext = f['name'].split('.')[-1]
+                    blob = b.get_blob(f"{ext}/{f['name']}")
+                    blob.download_to_filename(f"./{f['name'][7::]}")
 
 
-def share_file(client, name):
-
-    for k, v in list_files(client).items():
-        for f in v:
-            if f['name'] == name:
-                ext = f['name'].split('.')[-1]
-                b = client.get_bucket(load_config()['bucket'])
-                blob = b.get_blob(f"{ext}/{f['name']}")
-                print(blob.generate_signed_url(timedelta(days=1)))
-                print(blob.public_url)
+def share_file(client, files):
+    b = client.get_bucket(load_config()['bucket'])
+    for target in files:
+        for k, v in list_files(client).items():
+            for f in v:
+                if f['name'] == target:
+                    ext = f['name'].split('.')[-1]
+                    blob = b.get_blob(f"{ext}/{f['name']}")
+                    print(f"{f['name']} -> {blob.generate_signed_url(timedelta(days=1))}")
 
 
 def remove(client, files):
     b = client.get_bucket(load_config()['bucket'])
-
     if files[0] == "*":
         for i in b.list_blobs():
             b.get_blob(i.name).delete()
@@ -145,14 +144,13 @@ def main():
     parser.add_argument('path', type=str, nargs='?')
 
     parser.add_argument('--init', action="store_true", required=False, help="Initializes STFU for use")
-    parser.add_argument('--type', '-t', default=None, type=str, help='Specifies filetype for --list')
+    parser.add_argument('--download', '-d', nargs="+", required=False, help="Downloads specified file")
     parser.add_argument('--rm', nargs="+", required=False, help="Remove file")
+    parser.add_argument('--share', nargs="+", required=False, help='Create shareable link to file')
     parser.add_argument('--list', '-l', action='store_true', required=False, help="Lists files in storage")
-    parser.add_argument('--download', '-d', action="store", required=False, help="Downloads specified file")
+    parser.add_argument('--type', '-t', default=None, type=str, help='Specifies filetype for --list')
     parser.add_argument('--size', '-s', action='store_true', required=False, help="Shows size when using --list")
-    parser.add_argument('--date', '-c', action='store_true', required=False,
-                        help="Shows created date when using --list")
-    parser.add_argument('--share', action='store', required=False, help='Create shareable link to file')
+    parser.add_argument('--date', '-c', action='store_true', required=False, help="Shows created date when using --list")
     args = parser.parse_args()
 
     if args.init:

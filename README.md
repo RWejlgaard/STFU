@@ -15,6 +15,19 @@ Any time is a good time to STFU.
 
 ## How?
 
+### Prerequisite
+A service account JSON file is required for authentication
+To generate a file go to the below link:
+
+https://console.cloud.google.com/iam-admin/serviceaccounts/create
+
+### Building
+``` bash
+make
+make install
+```
+
+
 ### Examples
 
 Let's say you have a file called "cool-project.zip" and you want this file to not get accidentally deleted.
