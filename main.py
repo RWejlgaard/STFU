@@ -3,11 +3,14 @@
 from google.cloud import storage
 from glob import glob
 import humanize
+from datetime import datetime, timedelta
 import argparse
 import random
 import string
 import yaml
 import os
+
+from oauth2client.service_account import ServiceAccountCredentials
 
 
 def load_config():
@@ -25,6 +28,7 @@ def initialize():
     conf = {
         "project": input("Enter projectID: "),
         "bucket": input("Enter bucket name: "),
+        "service-account-json-path": input("Enter path of service-account JSON file:")
     }
     yaml.dump(conf, open(os.path.expanduser("~/.stfurc"), "w"))
 
@@ -57,13 +61,25 @@ def format_list(files, size=False, date=False):
 
 
 def download(client, file):
-    for k, v in list_files().items():
+    for k, v in list_files(client).items():
         for f in v:
             if f['name'] == file:
                 ext = f['name'].split('.')[-1]
                 b = client.get_bucket(load_config()['bucket'])
                 blob = b.get_blob(f"{ext}/{f['name']}")
                 blob.download_to_filename(f"./{f['name'][7::]}")
+
+
+def share_file(client, name):
+
+    for k, v in list_files(client).items():
+        for f in v:
+            if f['name'] == name:
+                ext = f['name'].split('.')[-1]
+                b = client.get_bucket(load_config()['bucket'])
+                blob = b.get_blob(f"{ext}/{f['name']}")
+                print(blob.generate_signed_url(timedelta(days=1)))
+                print(blob.public_url)
 
 
 def remove(client, files):
@@ -136,16 +152,20 @@ def main():
     parser.add_argument('--size', '-s', action='store_true', required=False, help="Shows size when using --list")
     parser.add_argument('--date', '-c', action='store_true', required=False,
                         help="Shows created date when using --list")
+    parser.add_argument('--share', action='store', required=False, help='Create shareable link to file')
     args = parser.parse_args()
 
     if args.init:
         initialize()
 
     config = load_config()
-    client = storage.Client(project=config['project'])
+    try:
+        client = storage.Client.from_service_account_json(config['service-account-json-path'])
+    except KeyError:
+        initialize()
 
     if args.path is None:
-        if args.list is False and args.rm is None and args.download is None:
+        if args.list is False and args.rm is None and args.download is None and args.share is None:
             exit(0)
 
     if args.list:
@@ -154,6 +174,8 @@ def main():
         download(client, args.download)
     elif args.rm is not None:
         remove(client, args.rm)
+    elif args.share is not None:
+        share_file(client, args.share)
     elif args.path is not None:
         upload(client, args.path)
 
