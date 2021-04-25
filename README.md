@@ -1,5 +1,7 @@
 # STFU
 
+![example gif](.img/example_use.gif)
+
 ## What?
 Simple Type-organized File Uploader
 
