@@ -35,8 +35,10 @@ zip
  ├ ft0spo-cool-project.zip
  ├ oot699-cool-project.zip
  └ y9gk7r-cool-project.zip
-
 ```
+
+Another example with more different filetypes
+![list_example](.img/example.png)
 
 ### Arguments
 |Flag|Short|Description|
