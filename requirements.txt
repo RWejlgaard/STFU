@@ -1,0 +1,8 @@
+gcloud>=0.18.3
+oauth2client>=4.1.3
+google-api-python-client>=2.2.0
+humanize~=3.4.1
+PyYAML~=5.4.1
+google~=3.0.0
+google-cloud-storage
+cython
