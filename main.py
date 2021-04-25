@@ -1,16 +1,12 @@
-#!.venv/bin/python3
-
 from google.cloud import storage
+from datetime import timedelta
 from glob import glob
 import humanize
-from datetime import datetime, timedelta
 import argparse
 import random
 import string
 import yaml
 import os
-
-from oauth2client.service_account import ServiceAccountCredentials
 
 
 def load_config():
@@ -86,6 +82,7 @@ def remove(client, files):
     b = client.get_bucket(load_config()['bucket'])
     if files[0] == "*":
         for i in b.list_blobs():
+            print(f"Removed {i.name}")
             b.get_blob(i.name).delete()
     for target in files:
         for k, v in list_files(client).items():
@@ -144,23 +141,21 @@ def main():
     parser.add_argument('path', type=str, nargs='?')
 
     parser.add_argument('--init', action="store_true", required=False, help="Initializes STFU for use")
-    parser.add_argument('--download', '-d', nargs="+", required=False, help="Downloads specified file")
-    parser.add_argument('--rm', nargs="+", required=False, help="Remove file")
-    parser.add_argument('--share', nargs="+", required=False, help='Create shareable link to file')
+    parser.add_argument('--download', '-d', metavar="FILES", nargs="+", required=False, help="Downloads specified file")
+    parser.add_argument('--rm', '-r', metavar="FILES", nargs="+", required=False, help="Remove file")
+    parser.add_argument('--share', metavar="FILES", nargs="+", required=False, help='Create shareable link to file')
     parser.add_argument('--list', '-l', action='store_true', required=False, help="Lists files in storage")
     parser.add_argument('--type', '-t', default=None, type=str, help='Specifies filetype for --list')
     parser.add_argument('--size', '-s', action='store_true', required=False, help="Shows size when using --list")
-    parser.add_argument('--date', '-c', action='store_true', required=False, help="Shows created date when using --list")
+    parser.add_argument('--date', '-c', action='store_true', required=False, help="Shows create date when using --list")
     args = parser.parse_args()
 
     if args.init:
         initialize()
 
     config = load_config()
-    try:
-        client = storage.Client.from_service_account_json(config['service-account-json-path'])
-    except KeyError:
-        initialize()
+
+    client = storage.Client.from_service_account_json(config['service-account-json-path'])
 
     if args.path is None:
         if args.list is False and args.rm is None and args.download is None and args.share is None:

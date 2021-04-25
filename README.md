@@ -1,5 +1,7 @@
 # STFU
 
+_pronounced "stuff-oo"_
+
 ![example gif](.img/example_use.gif)
 
 ## What?
@@ -61,7 +63,8 @@ Another example with more different filetypes
 |`PATH`| |Glob style path-name of file to upload|
 |`--init`| |Initializes `~/.stfurc` file with project name and bucket config|
 |`--list`|`-l`|Lists files in storage|
-|`--rm`| |Removes N amount of files by filename|
-|`--download`|`-d`|Downloads file by filename|
+|`--rm`|`-r`|Removes N amount of files by filename|
+|`--download`|`-d`|Downloads N amount of files by filename|
+|`--share`| |Create public link to N amount of files by filename|
 |`--date`|`-c`|Shows date created when using `--list`|
 |`--size`|`-s`|Shows file size when using `--list`|
